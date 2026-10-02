@@ -12,8 +12,8 @@ Read this file before making changes. These rules are not suggestions.
 
 | Item | Value |
 | --- | --- |
-| Live URL | _to be filled in after deploying to Netlify_ |
-| Repository | _to be filled in after pushing to GitHub_ |
+| Live URL | <https://adorable-raindrop-ea8591.netlify.app/> |
+| Repository | <https://github.com/maxodicch-svg/hng-shoprite> |
 | Stack | Next.js 15 (App Router) + TypeScript + Tailwind, server components |
 | Database | Supabase Postgres — `products`, `orders`, `order_items`, `profiles` |
 | Email | Resend HTTP API (Mailgun transport retained but off by default) |
@@ -182,12 +182,12 @@ npm run dev       # http://localhost:3000
 
 ## 7. Deployment checklist
 
-- [ ] `npm run check` green
-- [ ] `AGENTS.md` present at the repository root (assignment requirement)
-- [ ] `README.md` documents the live URL and how to run
-- [ ] Pushed to GitHub
-- [ ] Imported into Netlify with all env vars set (Production and Deploy Previews)
-- [ ] `supabase/schema.sql` run against the production Supabase project
+- [x] `npm run check` green
+- [x] `AGENTS.md` present at the repository root (assignment requirement)
+- [x] `README.md` documents the live URL and how to run
+- [x] Pushed to GitHub
+- [x] Imported into Netlify with all env vars set (Production and Deploy Previews)
+- [x] `supabase/schema.sql` run against the production Supabase project
 - [ ] Supabase + Google redirect URLs include the live domain
 - [ ] Every row of the SETUP.md verification table checked against the live URL
 - [ ] Live URL submitted through the official Zedu Lesson 2 form before the deadline
