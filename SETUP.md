@@ -252,3 +252,21 @@ child process per file over pipes; some Windows ACL policies deny that. The
 `test` script therefore runs both suites in-process instead. Keep it that way on
 Windows.
 
+**4. `git push` fails with `RPC failed; curl 55 Send failure: Connection was
+reset`** (or `send-pack: unexpected disconnect while reading sideband packet`, or
+`Empty reply from server`). Endpoint protection interferes with Git's HTTP/2
+connection, typically *after* the objects have finished uploading — so the output
+looks like the push almost made it. Whether the ref actually landed is unclear,
+so check before retrying:
+
+```bash
+git ls-remote origin          # no refs listed = the push did not land
+git config http.version HTTP/1.1
+git config http.postBuffer 524288000
+git push origin main
+```
+
+The failure is intermittent: even with HTTP/1.1 in place a retry can be needed.
+`git ls-remote` is the only trustworthy check — `git push` can print
+`Everything up-to-date` while the remote is in fact still empty.
+
