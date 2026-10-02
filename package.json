@@ -1,0 +1,41 @@
+{
+  "name": "hng-shop",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Zedu Store - shop + checkout with Supabase persistence, Mailgun emails and Google auth (HNG15 Lesson 2).",
+  "scripts": {
+    "dev": "next dev -p 3000",
+    "build": "next build",
+    "start": "next start -p 3000",
+    "lint": "next lint",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/lib.test.mjs && node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/flow.test.mjs && node --experimental-strip-types --disable-warning=MODULE_TYPELESS_PACKAGE_JSON tests/email.test.mjs",
+    "test:watch": "npm test",
+    "check": "tsc --noEmit && npm test"
+  },
+  "dependencies": {
+    "@supabase/ssr": "0.5.2",
+    "@supabase/supabase-js": "2.58.0",
+    "next": "15.5.27",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  },
+  "devDependencies": {
+    "@next/swc-wasm-nodejs": "^15.5.27",
+    "@types/node": "22.15.3",
+    "@types/react": "19.1.8",
+    "@types/react-dom": "19.1.6",
+    "autoprefixer": "10.4.21",
+    "eslint": "9.25.1",
+    "eslint-config-next": "15.5.27",
+    "postcss": "8.5.3",
+    "tailwindcss": "3.4.17",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "optionalDependencies": {
+    "@next/swc-win32-x64-msvc": "^15.5.27"
+  }
+}
