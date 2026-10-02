@@ -76,7 +76,7 @@ Restart the dev server. The banner at the top should now read *Live mode*, and
    - Name: `Zedu Store`
    - **Authorised JavaScript origins**:
      - `http://localhost:3000`
-     - `https://<your-vercel-domain>` (add after your first deploy)
+     - `https://<your-site>.netlify.app` (add after your first deploy)
    - **Authorised redirect URI** — this points at *Supabase*, not at the app:
      - `https://<project-ref>.supabase.co/auth/v1/callback`
 4. Press **Create** and copy the **Client ID** and **Client secret**.
@@ -88,7 +88,7 @@ Restart the dev server. The banner at the top should now read *Live mode*, and
 3. **Authentication → URL Configuration**:
    - Site URL: `http://localhost:3000`
    - Redirect URLs: add `http://localhost:3000/auth/callback` **and**
-     `https://<your-vercel-domain>/auth/callback`.
+     `https://<your-site>.netlify.app/auth/callback`.
 
 **Step C — verify**
 
@@ -162,19 +162,45 @@ sandbox → Authorized recipients** — a sandbox domain rejects everything else
 
 ---
 
-## 3. Deploy — Vercel
+## 3. Deploy — Netlify
 
 1. Push this folder to GitHub (see the README).
-2. [vercel.com/new](https://vercel.com/new) → import the repository. Framework
-   preset is detected as **Next.js**.
-3. **Environment Variables** — add every key from `.env.local`
-   (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`,
-   `SUPABASE_SERVICE_ROLE_KEY`, `RESEND_API_KEY`, `RESEND_FROM`,
-   `EMAIL_PROVIDER=resend`) for Production, Preview and Development.
-4. Deploy, then add the live URL to:
-   - Supabase **Authentication → URL Configuration** (Site URL + `/auth/callback`)
-   - Google Cloud **Authorised JavaScript origins** and, if you use a custom
-     domain, the redirect URI stays the Supabase one.
+2. [app.netlify.com/start](https://app.netlify.com/start) → **Import an existing
+   project** → pick the repository. Netlify detects Next.js and provisions
+   everything itself through its OpenNext adapter. Leave the build command
+   (`next build`) and publish directory at their detected defaults, and do **not**
+   add `@netlify/plugin-nextjs` to `package.json` — Netlify installs the adapter
+   and keeps it current on every build. This covers SSR, Route Handlers and the
+   Next.js Middleware (which becomes an Edge Function).
+3. **Site configuration → Environment variables** — add every key from
+   `.env.local`:
+
+   | Variable | Value |
+   | --- | --- |
+   | `NEXT_PUBLIC_SUPABASE_URL` | `https://<project-ref>.supabase.co` |
+   | `NEXT_PUBLIC_SUPABASE_ANON_KEY` | from `.env.local` |
+   | `SUPABASE_SERVICE_ROLE_KEY` | from `.env.local` |
+   | `RESEND_API_KEY` | from `.env.local` |
+   | `RESEND_FROM` | `Zedu Store <onboarding@resend.dev>` |
+   | `RESEND_REPLY_TO` | your own address |
+   | `EMAIL_PROVIDER` | `resend` |
+
+   `EMAIL_PROVIDER` is not optional: `.env.local` never leaves your machine, so
+   without it the deployed site has no email provider and checkout reports
+   `email_status = skipped`.
+
+   > **Do not set `NODE_ENV=production`.** Tailwind, PostCSS, TypeScript and the
+   > `@types/*` packages are `devDependencies`, and Netlify skips
+   > `devDependencies` when `NODE_ENV` is `production` — the build would fail.
+   > Netlify leaves `NODE_ENV` unset by default, which is what you want.
+4. **Deploy site**, then add the live URL to:
+   - Supabase **Authentication → URL Configuration** — Site URL, plus
+     `https://<your-site>.netlify.app/auth/callback` under Redirect URLs
+   - Google Cloud **Authorised JavaScript origins**. The *redirect URI* does not
+     change — it stays the Supabase callback.
+
+Netlify's build uses the Node version pinned in `.nvmrc` (Node 20). To change it,
+edit that file or set a `NODE_VERSION` environment variable.
 
 ---
 

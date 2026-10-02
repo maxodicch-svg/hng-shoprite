@@ -2,7 +2,7 @@
   "name": "hng-shop",
   "version": "1.0.0",
   "private": true,
-  "description": "Zedu Store - shop + checkout with Supabase persistence, Mailgun emails and Google auth (HNG15 Lesson 2).",
+  "description": "Zedu Store - shop + checkout with Supabase persistence, Resend emails and Google auth (HNG15 Lesson 2).",
   "scripts": {
     "dev": "next dev -p 3000",
     "build": "next build",

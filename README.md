@@ -3,8 +3,8 @@
 A shop with a real **checkout page**, orders **persisted in Postgres (Supabase)**,
 **Resend** confirmation emails and **Google sign-in**.
 
-**Live URL:** _add after deploying to Vercel_
-**Repository:** _add after pushing to GitHub_
+**Live URL:** <https://adorable-raindrop-ea8591.netlify.app/>
+**Repository:** <https://github.com/maxodicch-svg/hng-shoprite>
 
 | | |
 | --- | --- |
@@ -13,7 +13,7 @@ A shop with a real **checkout page**, orders **persisted in Postgres (Supabase)*
 | Email | Resend HTTP API (`POST /api.resend.com/emails`) |
 | Auth | Google OAuth — Google Cloud Console client → Supabase Auth provider |
 | Tests | 48 tests in 3 suites, `node:test`, zero test dependencies |
-| Deploy | Vercel (see [SETUP.md](./SETUP.md)) |
+| Deploy | Netlify — <https://adorable-raindrop-ea8591.netlify.app/> (see [SETUP.md](./SETUP.md)) |
 
 ---
 
@@ -168,9 +168,11 @@ Money is stored as integer minor units — never floats.
 
 ## Deploy
 
-Vercel is the intended target (`vercel.json` included). Add the environment
-variables, then update the Supabase and Google redirect URLs to include the live
-domain. Full walkthrough with screenshots-in-words: [SETUP.md](./SETUP.md).
+Netlify is the deployment target, configured with zero framework config: its
+OpenNext adapter provisions the SSR function, the Route Handlers and the Edge
+Middleware on its own. Add the environment variables, then update the Supabase
+and Google redirect URLs to include the live domain. Full walkthrough:
+[SETUP.md](./SETUP.md).
 
 ---
 
