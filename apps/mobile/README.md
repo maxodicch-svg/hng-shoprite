@@ -124,13 +124,33 @@ dependency) or an EAS build — Expo Go shows its own icon.
 
 ## Demonstrating the requirement
 
+### Pre-flight — all five must be true before you record
+
+| # | Check | How |
+| --- | --- | --- |
+| 1 | Schema applied | Supabase Table Editor lists `carts` + `cart_items` |
+| 2 | Realtime enabled | Database → Publications → `supabase_realtime` lists both tables |
+| 3 | Redirect URL registered | `zedustore://auth/callback` is in Authentication → URL Configuration |
+| 4 | API routes deployed | `curl -i .../api/cart` returns **401**, not 404 |
+| 5 | Phone ready | Expo Go installed, signed into the same Wi-Fi (or use `--tunnel`) |
+
+### The shot
+
 1. On the website, sign in with Google and add a product to the cart.
 2. Open the app, sign in with **the same** account.
 3. The Cart tab shows the item already there — fetched from `/api/cart`.
    **Hold on this shot; it is what is graded.**
-4. Add a second product in the app, keeping the laptop in frame: with Realtime
+4. Add a second product in the app, leaving the laptop in frame: with Realtime
    on, the website cart updates by itself, with no reload.
 5. Pull to refresh in the app so the fallback mechanism is on camera too.
+
+### One thing to know before you demo checkout
+
+Checking out **does not empty the shared cart**. That is deliberate and matches
+how the website behaves — `createOrder` persists an order, it does not touch
+`carts`. So if you place an order on camera, the items stay in both carts
+afterwards. Either leave checkout out of the recording, or say so on camera;
+do not let it look like the order failed.
 
 ---
 
