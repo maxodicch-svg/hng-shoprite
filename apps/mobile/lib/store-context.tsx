@@ -31,7 +31,7 @@ import {
   type ReactNode,
 } from 'react';
 
-import { CATALOG, type Product } from './catalog.ts';
+import { CATALOG, shippingFor, type Product } from './catalog.ts';
 import {
   MAX_LINE_QUANTITY,
   normalizeCart,
@@ -115,7 +115,10 @@ function optimisticCart(lines: CartLine[], products: Product[]): ServerCart {
     currency = product.currency;
   }
 
-  const shipping = subtotal <= 0 ? 0 : subtotal >= 15000 ? 0 : 900;
+  // Mirrors `shippingFor()` in catalog.ts, using the shared constants rather than
+  // repeating the numbers. This is only the optimistic figure — the server's
+  // response replaces it a moment later.
+  const shipping = subtotal <= 0 ? 0 : shippingFor(subtotal);
 
   return {
     lines,
