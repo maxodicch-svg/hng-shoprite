@@ -14,4 +14,4 @@ npm-debug.log*
 # next-env.d.ts
 
 # Internal AI session handoff notes; kept locally, not part of the published project
-HANDOFF.md
+HANDOFF*.md
