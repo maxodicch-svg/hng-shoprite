@@ -49,6 +49,46 @@ curl -i https://adorable-raindrop-ea8591.netlify.app/api/cart
 # if you get 404, the new routes are not deployed yet — push and wait for Netlify
 ```
 
+### Preferred: install in GitHub Codespaces
+
+The SDK 57 dependency tree is ~250 packages of native modules, and installing it
+over a flaky or inspected connection fails part-way with `ECONNRESET`, leaving
+`node_modules` half-built. Codespaces removes that variable entirely, and the
+lesson guide explicitly allows it.
+
+A `.devcontainer/devcontainer.json` is committed at the repository root, so the
+environment is preconfigured: Node 22, the Metro ports forwarded, and
+`npm install && npx expo install --fix` run automatically on creation.
+
+1. **Push first** — Codespaces builds from GitHub, so local-only commits are not
+   there:
+   ```bash
+   cd C:\Users\USER\Documents\HNG\hng-shop
+   git push origin main
+   ```
+2. Open <https://github.com/maxodicch-svg/hng-shoprite> → **Code** → **Codespaces**
+   → **Create codespace on main**. Wait for the post-create install to finish.
+3. In the Codespaces terminal:
+   ```bash
+   cd apps/mobile
+   cp .env.example .env      # fill in the Supabase anon key
+   npx expo start --tunnel
+   ```
+   `--tunnel` is **required** here: Codespaces is not on your Wi-Fi, so the
+   phone reaches Metro through Expo's relay instead of the LAN.
+4. Scan the QR code with Expo Go on the phone.
+
+Then do the Supabase steps below (redirect URL + Realtime publication) exactly as
+written — they are the same regardless of where Metro runs.
+
+> The generated `apps/mobile/package-lock.json` and any `node_modules` stay in the
+> codespace. If you want the lockfile back, commit it there and pull it locally
+> afterwards.
+
+### Or: install locally
+
+Use this if the network is healthy enough to pull ~250 packages without a reset.
+
 ### 1. Install
 
 ```bash
