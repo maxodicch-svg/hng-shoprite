@@ -1,0 +1,10 @@
+node_modules/
+.expo/
+dist/
+web-build/
+*.log
+.DS_Store
+
+# Local secrets — never commit. .env.example is the committed template.
+.env
+.env.local

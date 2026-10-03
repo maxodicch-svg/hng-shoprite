@@ -8,7 +8,7 @@
  * bypassed.
  */
 
-import type { PricedOrder } from './cart.ts';
+import type { CartLine, PricedOrder } from './cart.ts';
 
 export type MockOrder = {
   id: string;
@@ -107,4 +107,29 @@ export function listMockOrders(userId: string): MockOrder[] {
 /** Test helper — clears the store between cases. */
 export function clearMockOrders(): void {
   orders.clear();
+}
+
+// --------------------------------------------------------------------- carts ---
+// The shared draft cart, held per user id. Same contract as the Supabase path
+// in `store.ts`: read returns `[]`, write never throws.
+
+const carts = new Map<string, CartLine[]>();
+
+export function getMockCart(userId: string): CartLine[] {
+  return (carts.get(userId) ?? []).map((line) => ({ ...line }));
+}
+
+export function saveMockCart(userId: string, lines: CartLine[]): CartLine[] {
+  const stored = lines.map((line) => ({ ...line }));
+  carts.set(userId, stored);
+  return stored.map((line) => ({ ...line }));
+}
+
+export function deleteMockCart(userId: string): void {
+  carts.delete(userId);
+}
+
+/** Test helper — clears the mock carts between cases. */
+export function clearMockCarts(): void {
+  carts.clear();
 }

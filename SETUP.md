@@ -115,7 +115,7 @@ to get started.
    > owns the account. Sending anywhere else returns `403`. Verifying a domain
    > (step 5) lifts that restriction.
 2. Open [resend.com/api-keys](https://resend.com/api-keys) → **Create API Key**.
-   Name it `zedu-store`, give it **Sending access**, and copy the key (`re_…`).
+   Name it `zedu-store`, give it **Sending access**, and copy the key (`re_â€¦`).
    The key is shown once.
 3. Fill in `.env.local`:
 
@@ -207,7 +207,7 @@ edit that file or set a `NODE_VERSION` environment variable.
 ## 4. Verify everything (5 minutes)
 
 ```bash
-npm run check          # typecheck + 48 tests
+npm run check          # typecheck + 72 tests
 npm run dev
 ```
 
@@ -223,6 +223,15 @@ npm run dev
 | 8 | Inbox | Confirmation email with the same reference and total |
 | 9 | Sign in with Google, buy again | `/orders` lists both, new row has `user_id` set |
 | 10 | Tamper in the browser console | Editing `localStorage` prices changes nothing — the server re-prices |
+| 11 | `GET /api/cart` with no `Authorization` header | `401` `{ error }` — the cart is never readable anonymously |
+| 12 | `PUT /api/cart` with `{"items":"nope"}` | `422` `{ error, issues[0].field: "items" }` |
+| 13 | `PUT /api/cart` with `{"items":[{"slug":"aura-desk-lamp","quantity":2}]}` | `200`, echoed `lines`, and `totalCents` = 2 Ã— lamp + shipping |
+| 14 | `PUT` a price into the body, e.g. `{"items":[â€¦],"totalCents":1}` | Response ignores it — `totalCents` is recomputed from the catalog |
+| 15 | `DELETE /api/cart` | `200` with `lines: []` and `totalCents: 0` |
+| 16 | Sign in on the site, add an item, open the mobile app on the same account | The mobile cart shows the same line (the cross-device requirement) |
+| 17 | `GET /api/products` | `200` `{ ok, count: 6, source, products[] }` |
+| 18 | With the site open, change the cart in the mobile app | The website cart updates without a reload (Realtime) |
+| 19 | Supabase → Database → Publications → `supabase_realtime` | `carts` and `cart_items` are both listed |
 
 ---
 
@@ -266,7 +275,7 @@ cp node_modules/@next/swc-win32-x64-msvc/* \
    node_modules/next/next-swc-fallback/@next/swc-win32-x64-msvc/
 ```
 
-Swap `win32-x64` for your platform (`darwin-arm64`, `linux-x64-gnu`, …). After
+Swap `win32-x64` for your platform (`darwin-arm64`, `linux-x64-gnu`, â€¦). After
 that `npm run build` and `npm run dev` both work offline.
 
 If `npm install` was run with `--ignore-scripts`, nothing else is missing: the

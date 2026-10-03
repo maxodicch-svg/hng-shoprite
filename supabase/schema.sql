@@ -70,11 +70,77 @@ create table if not exists public.order_items (
 
 create index if not exists order_items_order_id_idx on public.order_items (order_id);
 
+-- -------------------------------------------------------------------- carts --
+-- One shared draft cart per signed-in user, so the website and the mobile app
+-- read the same lines. This is still a *draft*: the order record created at
+-- checkout remains the record of truth, and nothing here is ever priced —
+-- totals are recomputed from `products` by priceCart() on every read.
+--
+-- Guest carts deliberately have no row: a signed-out visitor stays on
+-- localStorage and merges into this table if they sign in.
+create table if not exists public.carts (
+  id          uuid primary key default gen_random_uuid(),
+  user_id     uuid not null unique references auth.users (id) on delete cascade,
+  created_at  timestamptz not null default now(),
+  updated_at  timestamptz not null default now()
+);
+
+create index if not exists carts_user_id_idx on public.carts (user_id);
+
+-- --------------------------------------------------------------- cart_items --
+-- A line in that draft. `product_slug` is a soft reference (no FK) so a line
+-- survives a catalog reseed; priceCart() drops any slug that no longer exists.
+-- Quantities are clamped to MAX_LINE_QUANTITY (10) by normalizeCart() before
+-- they are written, and the check below is the database's copy of that rule.
+create table if not exists public.cart_items (
+  id           uuid primary key default gen_random_uuid(),
+  cart_id      uuid not null references public.carts (id) on delete cascade,
+  product_slug text not null,
+  quantity     integer not null check (quantity > 0 and quantity <= 10),
+  created_at   timestamptz not null default now(),
+  updated_at   timestamptz not null default now(),
+  unique (cart_id, product_slug)
+);
+
+create index if not exists cart_items_cart_id_idx on public.cart_items (cart_id);
+
+-- Instant sync. Adding these tables to the realtime publication is what lets the
+-- mobile app (and any other open tab) hear about a cart change without polling.
+-- `replica identity full` is required so a DELETE carries the old row and the
+-- client can tell which cart it belonged to. Realtime still enforces the RLS
+-- policies below against the subscriber's own token, so nobody receives another
+-- account's cart events.
+alter table public.carts      replica identity full;
+alter table public.cart_items replica identity full;
+
+do $$
+begin
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'carts'
+  ) then
+    alter publication supabase_realtime add table public.carts;
+  end if;
+
+  if not exists (
+    select 1 from pg_publication_tables
+    where pubname = 'supabase_realtime'
+      and schemaname = 'public'
+      and tablename = 'cart_items'
+  ) then
+    alter publication supabase_realtime add table public.cart_items;
+  end if;
+end $$;
+
 -- ---------------------------------------------------------------------- RLS --
 alter table public.profiles    enable row level security;
 alter table public.products    enable row level security;
 alter table public.orders      enable row level security;
 alter table public.order_items enable row level security;
+alter table public.carts       enable row level security;
+alter table public.cart_items  enable row level security;
 
 -- Catalog is public read-only.
 drop policy if exists "products are public" on public.products;
@@ -114,6 +180,50 @@ drop policy if exists "order items insertable" on public.order_items;
 create policy "order items insertable" on public.order_items
   for insert with check (true);
 
+-- The cart is written by the server through /api/cart (service role key). These
+-- policies keep the table correct for any direct client access: a user can only
+-- ever see and touch their own cart, and only lines inside their own cart.
+drop policy if exists "own cart readable" on public.carts;
+create policy "own cart readable" on public.carts
+  for select using (auth.uid() is not null and auth.uid() = user_id);
+
+drop policy if exists "own cart insertable" on public.carts;
+create policy "own cart insertable" on public.carts
+  for insert with check (auth.uid() is not null and auth.uid() = user_id);
+
+drop policy if exists "own cart updatable" on public.carts;
+create policy "own cart updatable" on public.carts
+  for update using (auth.uid() is not null and auth.uid() = user_id)
+  with check (auth.uid() is not null and auth.uid() = user_id);
+
+drop policy if exists "own cart deletable" on public.carts;
+create policy "own cart deletable" on public.carts
+  for delete using (auth.uid() is not null and auth.uid() = user_id);
+
+drop policy if exists "own cart items readable" on public.cart_items;
+create policy "own cart items readable" on public.cart_items
+  for select using (
+    exists (select 1 from public.carts c where c.id = cart_id and c.user_id = auth.uid())
+  );
+
+drop policy if exists "own cart items insertable" on public.cart_items;
+create policy "own cart items insertable" on public.cart_items
+  for insert with check (
+    exists (select 1 from public.carts c where c.id = cart_id and c.user_id = auth.uid())
+  );
+
+drop policy if exists "own cart items updatable" on public.cart_items;
+create policy "own cart items updatable" on public.cart_items
+  for update using (
+    exists (select 1 from public.carts c where c.id = cart_id and c.user_id = auth.uid())
+  );
+
+drop policy if exists "own cart items deletable" on public.cart_items;
+create policy "own cart items deletable" on public.cart_items
+  for delete using (
+    exists (select 1 from public.carts c where c.id = cart_id and c.user_id = auth.uid())
+  );
+
 -- --------------------------------------------------------------- seed data --
 insert into public.products (slug, name, description, price_cents, badge, image_url, stock)
 values
@@ -139,3 +249,6 @@ on conflict (slug) do nothing;
 
 -- ------------------------------------------------------------------ verify ---
 -- select count(*) as products from public.products;
+-- select count(*) as carts from public.carts;
+-- select count(*) as cart_items from public.cart_items;
+-- select tablename from pg_publication_tables where pubname = 'supabase_realtime';

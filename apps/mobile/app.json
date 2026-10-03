@@ -1,0 +1,39 @@
+{
+  "expo": {
+    "name": "Zedu Store",
+    "slug": "zedu-store",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "zedustore",
+    "userInterfaceStyle": "light",
+    "newArchEnabled": true,
+    "icon": "./assets/icon.png",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#f8fafc"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "chat.zedu.store"
+    },
+    "android": {
+      "package": "chat.zedu.store",
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0f172a"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": ["expo-router"],
+    "extra": {
+      "comment": "The deep link `zedustore://auth/callback` must also be registered in Supabase -> Authentication -> URL Configuration -> Redirect URLs, or Google sign-in fails with a redirect error.",
+      "router": {
+        "origin": false
+      }
+    }
+  }
+}

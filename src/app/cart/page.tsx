@@ -7,15 +7,31 @@ import { FREE_SHIPPING_THRESHOLD_CENTS } from '@/lib/products';
 
 /** Cart page. Draft only — the order is created at checkout. */
 export default function CartPage() {
-  const { priced, ready, setQuantity, remove, clear } = useCart();
+  const { priced, ready, syncState, setQuantity, remove, clear } = useCart();
 
   if (!ready) return <p className="muted">Loading your cart…</p>;
+
+  // Never colour-only: the text says what the colour implies. Announced so a
+  // screen reader hears the merge result after Google sign-in.
+  const syncNotice =
+    syncState === 'loading'
+      ? 'Syncing your cart with your account…'
+      : syncState === 'synced'
+        ? 'Your cart is synced to your account and shared with the mobile app.'
+        : syncState === 'error'
+          ? 'Could not reach your account cart. Your cart still works on this device.'
+          : null;
 
   if (priced.lines.length === 0) {
     return (
       <div className="card" style={{ padding: 26 }}>
         <h1 style={{ fontSize: 24 }}>Your cart is empty</h1>
         <p className="muted">Add something from the shop and it will show up here.</p>
+        {syncNotice && (
+          <p className="small muted" role="status" aria-live="polite">
+            {syncNotice}
+          </p>
+        )}
         <Link href="/" className="btn">
           Browse products
         </Link>
@@ -28,6 +44,11 @@ export default function CartPage() {
   return (
     <div>
       <h1 style={{ fontSize: 26 }}>Your cart</h1>
+      {syncNotice && (
+        <p className="small muted" role="status" aria-live="polite" style={{ marginTop: 0 }}>
+          {syncNotice}
+        </p>
+      )}
       <div className="split">
         <div className="card" style={{ padding: 20 }}>
           <table className="lines">

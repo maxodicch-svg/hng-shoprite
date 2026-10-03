@@ -15,7 +15,7 @@ Read this file before making changes. These rules are not suggestions.
 | Live URL | <https://adorable-raindrop-ea8591.netlify.app/> |
 | Repository | <https://github.com/maxodicch-svg/hng-shoprite> |
 | Stack | Next.js 15 (App Router) + TypeScript + Tailwind, server components |
-| Database | Supabase Postgres — `products`, `orders`, `order_items`, `profiles` |
+| Database | Supabase Postgres — `products`, `orders`, `order_items`, `profiles`, `carts`, `cart_items` |
 | Email | Resend HTTP API (Mailgun transport retained but off by default) |
 | Auth | Google OAuth via Google Cloud Console → Supabase Auth |
 | Runtime | Node.js >= 20 |
@@ -27,10 +27,12 @@ Read this file before making changes. These rules are not suggestions.
 | --- | --- |
 | Shop website | `src/app/page.tsx`, `src/app/product/[slug]/page.tsx`, `src/app/cart/page.tsx` |
 | Checkout page | `src/app/checkout/page.tsx` → `src/app/api/checkout/route.ts` |
+| Shared cart (web + mobile) | `src/app/api/cart/route.ts` → `src/lib/store.ts` (`getCart`/`saveCart`/`clearCart`) |
+| Mobile app | `apps/mobile/` — Expo/React Native, same account and cart as the website |
 | Database persistence | `supabase/schema.sql`, `src/lib/store.ts` |
 | Confirmation email | `src/lib/email.ts` + `src/lib/email/resend.ts`, resent at `src/app/api/orders/[reference]/email/route.ts` |
 | Google auth | `src/lib/auth-client.ts`, `src/app/auth/callback/route.ts`, `src/middleware.ts` |
-| Endpoint tests | `tests/lib.test.mjs`, `tests/flow.test.mjs`, `tests/email.test.mjs` |
+| Endpoint tests | `tests/lib.test.mjs`, `tests/flow.test.mjs`, `tests/email.test.mjs`, `tests/cart.test.mjs`, `tests/cart-api.test.mjs` |
 
 ---
 
@@ -93,7 +95,7 @@ tests/**              node:test suites on the pure modules
 ### Commands
 
 ```bash
-npm test          # 48 tests, in-process
+npm test          # 72 tests, in-process (66 web + 6 mobile)
 npm run check     # tsc --noEmit && npm test
 npm run build     # production build
 npm run dev       # http://localhost:3000

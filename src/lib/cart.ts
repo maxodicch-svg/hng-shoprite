@@ -66,6 +66,38 @@ export function normalizeCart(input: unknown, catalog: Product[] = CATALOG): Car
 }
 
 /**
+ * Combine cart line lists into one, summing quantities per slug.
+ *
+ * This is the **guest-merge rule** shared by the website and the mobile app:
+ * when a signed-out shopper with a local cart signs in, their guest lines are
+ * merged *into* the cart already stored on the server rather than replacing it.
+ *
+ * Chosen deliberately over "overwrite", because overwriting would silently
+ * destroy lines the same account added on another device — which is exactly the
+ * cross-device behaviour the mobile-app requirement is asking for. Summing keeps
+ * both sides; the cost is that an item added twice (once as a guest, once while
+ * signed in) ends up with the combined quantity, so callers surface it as a
+ * merge rather than pretending nothing happened. `normalizeCart` clamps every
+ * line to `MAX_LINE_QUANTITY` afterwards.
+ *
+ * @param groups any number of line lists, earlier groups first
+ * @returns one normalised line list, in first-seen order
+ */
+export function mergeCartLines(
+  ...groups: (readonly CartLine[] | CartLine[] | null | undefined)[]
+): CartLine[] {
+  const merged: CartLine[] = [];
+  for (const group of groups) {
+    if (!Array.isArray(group)) continue;
+    for (const line of group) {
+      if (!line || typeof line !== 'object') continue;
+      merged.push({ slug: String(line.slug ?? ''), quantity: normalizeQuantity(line.quantity) });
+    }
+  }
+  return normalizeCart(merged);
+}
+
+/**
  * Price a cart against the catalog. Empty lines are dropped, so an empty
  * catalog yields a zero-value order rather than an exception.
  */
