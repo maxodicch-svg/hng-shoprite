@@ -6,7 +6,6 @@
     "orientation": "portrait",
     "scheme": "zedustore",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
     "icon": "./assets/icon.png",
     "splash": {
       "image": "./assets/splash.png",
@@ -30,10 +29,7 @@
     },
     "plugins": ["expo-router"],
     "extra": {
-      "comment": "The deep link `zedustore://auth/callback` must also be registered in Supabase -> Authentication -> URL Configuration -> Redirect URLs, or Google sign-in fails with a redirect error.",
-      "router": {
-        "origin": false
-      }
+      "comment": "The deep link `zedustore://auth/callback` must also be registered in Supabase -> Authentication -> URL Configuration -> Redirect URLs, or Google sign-in fails with a redirect error."
     }
   }
 }

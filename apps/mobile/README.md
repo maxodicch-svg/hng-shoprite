@@ -55,10 +55,16 @@ curl -i https://adorable-raindrop-ea8591.netlify.app/api/cart
 cd apps/mobile
 npm install
 
-# Aligns every Expo package with the installed SDK. If this reports anything,
-# let it fix the versions — Expo SDKs are strict about them.
-npx expo install --check
+# REQUIRED: aligns every Expo package with the installed SDK. Expo SDKs pin
+# native module versions exactly, and a mismatch is the usual cause of a red
+# screen on first launch. This is also the official SDK 57 upgrade path.
+npx expo install --fix
+npx expo-doctor          # optional but quick: sanity-checks the whole config
 ```
+
+This app targets **Expo SDK 57** (React Native 0.86.3, React 19.2). The
+`package.json` versions were set from Expo's own SDK metadata, but `--fix` is the
+authority — let it correct anything it flags.
 
 ### 2. Configure
 
@@ -95,6 +101,27 @@ npx expo start --tunnel # if phone and computer are not on the same Wi-Fi
 ```
 
 Requirements: the **Expo Go** app on the phone. An APK is not needed.
+
+> **SDK 57 and Expo Go — read this before recording.** Expo SDK 57 shipped on
+> 30 June 2026, and per the release notes the Expo Go build for it *had not yet
+> been approved* for the App Store / Play Store. What that means in practice:
+>
+> - **Android:** an up-to-date Play Store Expo Go supports SDK 57, and the CLI can
+>   also install the matching Expo Go onto a connected device.
+> - **iOS:** the SDK 57 Expo Go is installed with `eas go`, or onto a simulator
+>   through the CLI — not from the App Store.
+>
+> If Expo Go reports *"project is incompatible with this version of Expo Go"*,
+> that is this issue rather than a bug in the app. Install the matching client:
+>
+> ```bash
+> npx eas go               # iOS device: installs the SDK 57 Expo Go build
+> # or build a development client, which also gives you a real launcher icon:
+> npx expo run:android
+> ```
+>
+> `expo-dev-client` is already an optional dependency, so `npx expo run:android`
+> needs nothing extra.
 
 ---
 
