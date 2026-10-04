@@ -16,6 +16,9 @@ npm-debug.log*
 # Internal AI session handoff notes; kept locally, not part of the published project
 HANDOFF*.md
 
+# Output of tools/install-mobile.ps1 — a local diagnostic log
+tools/install-log.txt
+
 # Expo / React Native app (apps/mobile) — its own .gitignore also applies.
 apps/mobile/node_modules/
 apps/mobile/.expo/
