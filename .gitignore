@@ -20,6 +20,7 @@ HANDOFF*.md
 # copy lands in tools/, the convenience copy in apps/mobile/, and the ad-hoc
 # invocations produced install-log2..5.txt; none of them belong in the repo.
 **/install-log*.txt
+**/resume-install-log.txt
 
 # Scratch space: the redirected npm cache, unpacked archives, temp downloads.
 # It reached 144 MB / 2592 files and was once committed by `git add -A` — never
