@@ -49,62 +49,40 @@ curl -i https://adorable-raindrop-ea8591.netlify.app/api/cart
 # if you get 404, the new routes are not deployed yet — push and wait for Netlify
 ```
 
-### Preferred: install in GitHub Codespaces
+### Why this app is pinned to Expo SDK 54
 
-The SDK 57 dependency tree is ~250 packages of native modules, and installing it
-over a flaky or inspected connection fails part-way with `ECONNRESET`, leaving
-`node_modules` half-built. Codespaces removes that variable entirely, and the
-lesson guide explicitly allows it.
+Deliberate decision, recorded here because it looks like an oversight otherwise.
 
-A `.devcontainer/devcontainer.json` is committed at the repository root, so the
-environment is preconfigured: Node 22, the Metro ports forwarded, and
-`npm install && npx expo install --fix` run automatically on creation.
+SDK 57 exists (it is npm's `latest`), and the app was upgraded to it and then put
+back. The reason is purely the development machine: SDK 57's dependency tree is
+large, and on a connection that resets part-way (`ECONNRESET`) the install never
+completed, so the app could never be launched at all. SDK 54's tree installed
+successfully and its tarballs are already in the local npm cache, which makes it
+the **fastest working path** to a running app.
 
-1. **Push first** — Codespaces builds from GitHub, so local-only commits are not
-   there:
-   ```bash
-   cd C:\Users\USER\Documents\HNG\hng-shop
-   git push origin main
-   ```
-2. Open <https://github.com/maxodicch-svg/hng-shoprite> → **Code** → **Codespaces**
-   → **Create codespace on main**. Wait for the post-create install to finish.
-3. In the Codespaces terminal:
-   ```bash
-   cd apps/mobile
-   cp .env.example .env      # fill in the Supabase anon key
-   npx expo start --tunnel
-   ```
-   `--tunnel` is **required** here: Codespaces is not on your Wi-Fi, so the
-   phone reaches Metro through Expo's relay instead of the LAN.
-4. Scan the QR code with Expo Go on the phone.
+It is also the safer choice for this specific demo: Expo Go for SDK 54 is the
+build currently on the App Store and Play Store, whereas the SDK 57 Expo Go had
+not cleared store review. On SDK 54 the phone's Expo Go matches the project.
 
-Then do the Supabase steps below (redirect URL + Realtime publication) exactly as
-written — they are the same regardless of where Metro runs.
-
-> The generated `apps/mobile/package-lock.json` and any `node_modules` stay in the
-> codespace. If you want the lockfile back, commit it there and pull it locally
-> afterwards.
-
-### Or: install locally
-
-Use this if the network is healthy enough to pull ~250 packages without a reset.
+Nothing in the app's code is SDK-specific — it uses only `expo-router`,
+`expo-web-browser`, `expo-linking` and Supabase, all of which exist in both. If
+the SDK 57 install is ever completed, the upgrade is one command from a working
+tree: `npx expo install expo@latest --fix`.
 
 ### 1. Install
 
 ```bash
 cd apps/mobile
 npm install
-
-# REQUIRED: aligns every Expo package with the installed SDK. Expo SDKs pin
-# native module versions exactly, and a mismatch is the usual cause of a red
-# screen on first launch. This is also the official SDK 57 upgrade path.
-npx expo install --fix
-npx expo-doctor          # optional but quick: sanity-checks the whole config
+npx expo install --check    # confirms the versions match SDK 54; apply any it flags
+npx expo-doctor             # optional but quick: sanity-checks the whole config
 ```
 
-This app targets **Expo SDK 57** (React Native 0.86.3, React 19.2). The
-`package.json` versions were set from Expo's own SDK metadata, but `--fix` is the
-authority — let it correct anything it flags.
+This app targets **Expo SDK 54** (React Native 0.81.5, React 19.1).
+
+> On this machine `npm install` has needed the flags recorded in SETUP.md §5
+> (`--maxsockets=1 --fetch-retries=12`) because the connection resets part-way.
+> Re-running the same command is the fix — the npm cache resumes where it stopped.
 
 ### 2. Configure
 
@@ -142,26 +120,15 @@ npx expo start --tunnel # if phone and computer are not on the same Wi-Fi
 
 Requirements: the **Expo Go** app on the phone. An APK is not needed.
 
-> **SDK 57 and Expo Go — read this before recording.** Expo SDK 57 shipped on
-> 30 June 2026, and per the release notes the Expo Go build for it *had not yet
-> been approved* for the App Store / Play Store. What that means in practice:
+> **Expo Go must match the SDK.** This project is SDK 54, so use a normal
+> up-to-date **Expo Go** from the App Store / Play Store — that build is SDK 54
+> and will load it directly. (This is a real advantage of staying on 54: the
+> SDK 57 Expo Go had not cleared store review.)
 >
-> - **Android:** an up-to-date Play Store Expo Go supports SDK 57, and the CLI can
->   also install the matching Expo Go onto a connected device.
-> - **iOS:** the SDK 57 Expo Go is installed with `eas go`, or onto a simulator
->   through the CLI — not from the App Store.
->
-> If Expo Go reports *"project is incompatible with this version of Expo Go"*,
-> that is this issue rather than a bug in the app. Install the matching client:
->
-> ```bash
-> npx eas go               # iOS device: installs the SDK 57 Expo Go build
-> # or build a development client, which also gives you a real launcher icon:
-> npx expo run:android
-> ```
->
-> `expo-dev-client` is already an optional dependency, so `npx expo run:android`
-> needs nothing extra.
+> If Expo Go reports *"project is incompatible with this version of Expo Go"*, the
+> installed Expo Go is on a different SDK than the project. Check what it supports
+> with `npx expo-doctor`, and either update Expo Go or, if you deliberately want to
+> move the project forward, run `npx expo install expo@latest --fix`.
 
 ---
 
