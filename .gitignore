@@ -19,6 +19,11 @@ HANDOFF*.md
 # Output of tools/install-mobile.ps1 — a local diagnostic log
 tools/install-log.txt
 
+# Scratch space: the redirected npm cache, unpacked archives, temp downloads.
+# It reached 144 MB / 2592 files and was once committed by `git add -A` — never
+# again at that size.
+.tmp/
+
 # Expo / React Native app (apps/mobile) — its own .gitignore also applies.
 apps/mobile/node_modules/
 apps/mobile/.expo/

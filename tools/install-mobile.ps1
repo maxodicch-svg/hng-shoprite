@@ -39,7 +39,6 @@ if ((Split-Path -Leaf $scriptDir) -eq 'mobile') {
   $app = Join-Path $repoRoot 'apps\mobile'
 }
 $log = Join-Path $scriptDir 'install-log.txt'
-$cache = Join-Path $repoRoot '.tmp\npm-cache-mobile'
 
 function Write-Log([string]$message) {
   $line = "[{0}] {1}" -f (Get-Date -Format 'HH:mm:ss'), $message
@@ -70,11 +69,26 @@ if ($LegacyProvider) {
 }
 
 # --- cache ------------------------------------------------------------------
-# The default %LocalAppData%\npm-cache is not writable here, which surfaced as
-# EPERM while npm wrote cache temp files. Point it inside the workspace instead.
+# THE ROOT CAUSE OF EVERY FAILED INSTALL ON THIS HOST.
+#
+# %LocalAppData%\npm-cache is not writable here, so npm aborts with
+#   EPERM: operation not permitted, open '...\npm-cache\_cacache\tmp\***'
+# Worse, npm_config_cache is set at USER scope, and an "env" config outranks both
+# the built-in and project .npmrc — so setting cache in a project .npmrc has no
+# effect whatsoever. It must be written to the user config, and the inherited
+# environment variable cleared for this process.
+$cache = Join-Path $repoRoot '.tmp\npm-cache-mobile'
 New-Item -ItemType Directory -Force -Path $cache | Out-Null
-& npm config set cache $cache --location=project | Out-Null
-Write-Log "cache set to $cache"
+
+$env:npm_config_cache = $cache
+& npm config set cache $cache --location=user | Out-Null
+
+$resolved = (& npm config get cache) -join ''
+Write-Log "cache set to $cache (user scope)"
+Write-Log "npm resolves cache as: $resolved"
+if ($resolved.Trim() -ne $cache) {
+  Write-Log "WARNING: npm is not using the intended cache — installs will likely fail with EPERM."
+}
 
 if (-not $KeepCache -and (Test-Path $cache)) {
   Write-Log "clearing the cache (pass -KeepCache to keep it)"
@@ -96,12 +110,22 @@ Write-Log "--- npm install (this can take many minutes) ---"
 Write-Log ""
 
 # --- install ----------------------------------------------------------------
-# --maxsockets=1 and the retry flags are the documented workaround for this host.
+# --cache is passed explicitly on the command line, not just configured. This
+# environment already carries npm_config_cache at USER scope (set by the npx
+# invocation that launched the tooling), and an "env" config outranks the
+# built-in and project .npmrc — so a config-file setting alone is silently
+# ignored and npm falls back to the unwritable %LocalAppData% cache. A CLI flag
+# outranks every config source, which is why it is used here.
+#
+# --maxsockets=1 and the retry flags follow the documented workaround for this
+# host's unstable connection.
 $npmArgs = @(
   'install',
+  "--cache=$cache",
   '--maxsockets=1',
   '--fetch-retries=12',
-  '--fetch-retry-maxtimeout=180000',
+  '--fetch-retry-maxtimeout=300000',
+  '--fetch-timeout=600000',
   '--no-audit',
   '--no-fund',
   '--loglevel=http'
