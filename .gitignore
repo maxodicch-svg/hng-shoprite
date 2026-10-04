@@ -16,8 +16,10 @@ npm-debug.log*
 # Internal AI session handoff notes; kept locally, not part of the published project
 HANDOFF*.md
 
-# Output of tools/install-mobile.ps1 — a local diagnostic log
-tools/install-log.txt
+# Output of tools/install-mobile.ps1 — local npm diagnostic logs. The script's
+# copy lands in tools/, the convenience copy in apps/mobile/, and the ad-hoc
+# invocations produced install-log2..5.txt; none of them belong in the repo.
+**/install-log*.txt
 
 # Scratch space: the redirected npm cache, unpacked archives, temp downloads.
 # It reached 144 MB / 2592 files and was once committed by `git add -A` — never
