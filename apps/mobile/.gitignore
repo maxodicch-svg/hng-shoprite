@@ -8,3 +8,8 @@ web-build/
 # Local secrets — never commit. .env.example is the committed template.
 .env
 .env.local
+
+# Machine-specific npm config. On this Windows host it points npm's cache at a
+# workspace path because the default cache directory is blocked; that path is
+# meaningless on any other machine, so it is not part of the project.
+.npmrc
