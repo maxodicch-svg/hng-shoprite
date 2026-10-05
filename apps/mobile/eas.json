@@ -1,0 +1,16 @@
+{
+  "build": {
+    "preview": {
+      "distribution": "internal",
+      "developmentClient": false,
+      "android": {
+        "buildType": "apk"
+      },
+      "env": {
+        "EXPO_PUBLIC_API_BASE_URL": "https://adorable-raindrop-ea8591.netlify.app",
+        "EXPO_PUBLIC_SUPABASE_URL": "https://mhikydmbjbajrkzbxdnz.supabase.co",
+        "EXPO_PUBLIC_SUPABASE_ANON_KEY": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1oaWt5ZG1iamJhanJremJ4ZG56Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTA4NTg0MzUsImV4cCI6MjEwNjQzNDQzNX0.uLC0TKpdK7SxmI2uASJNca5KvqghXX8BMdqVXYfRoqw"
+      }
+    }
+  }
+}
