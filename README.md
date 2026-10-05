@@ -231,9 +231,12 @@ cp .env.example .env      # add the Supabase anon key
 npx expo start            # scan the QR code with Expo Go
 ```
 
-It needs one Supabase setting: add `zedustore://auth/callback` to
-**Authentication → URL Configuration → Redirect URLs**. Details, the sync tier
-and the demo steps are in [apps/mobile/README.md](./apps/mobile/README.md).
+It needs one Supabase setting: add the return URL to **Authentication → URL
+Configuration → Redirect URLs** — `exp://<host>:8081/--/auth/callback` when you
+run it in Expo Go, `zedustore://auth/callback` in a dev or standalone build
+(Expo Go registers only its own `exp://` scheme; `lib/redirect.ts` picks the right
+one at runtime). Details, the sync tier and the demo steps are in
+[apps/mobile/README.md](./apps/mobile/README.md).
 
 ---
 
