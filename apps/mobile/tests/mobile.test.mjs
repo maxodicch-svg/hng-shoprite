@@ -10,6 +10,7 @@
 
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { existsSync, readFileSync } from 'node:fs';
 
 import { formatMoney, currencySymbol, minorUnitFactor } from '../lib/money.ts';
 import {
@@ -19,6 +20,13 @@ import {
   MAX_LINE_QUANTITY,
 } from '../lib/cart.ts';
 import { CATALOG, findProduct, shippingFor } from '../lib/catalog.ts';
+import {
+  AUTH_CALLBACK_PATH,
+  AUTH_SCHEME,
+  AUTH_SCHEME_REDIRECT,
+  authRedirectFor,
+  isExpoGoUrl,
+} from '../lib/redirect.ts';
 
 const LAMP = 'aura-desk-lamp'; // 8900
 const MUG = 'terra-ceramic-mug'; // 1900
@@ -85,4 +93,31 @@ test('mobile cart: the catalog mirrors the website, slug for slug', () => {
   assert.equal(shippingFor(15000), 0);
   assert.equal(shippingFor(14999), 900);
   assert.equal(shippingFor(0), 0);
+});
+
+test('mobile auth: the return URL is the one the running shell can receive', () => {
+  // Regression: the return URL used to be the hard-coded custom scheme, which
+  // Expo Go cannot receive, so the first sign-in attempt hung and the second
+  // threw "the auth session is in an invalid state with a redirect handler set".
+  const expoGo = 'exp://192.168.43.67:8081/--/auth/callback';
+  assert.equal(authRedirectFor(expoGo), expoGo);
+  assert.equal(authRedirectFor('exps://kmane-8081.exp.direct/--/auth/callback'),
+    'exps://kmane-8081.exp.direct/--/auth/callback');
+
+  // A dev or standalone build registers app.json's scheme, so it keeps using it.
+  assert.equal(authRedirectFor(AUTH_SCHEME_REDIRECT), 'zedustore://auth/callback');
+  assert.equal(AUTH_SCHEME_REDIRECT, `${AUTH_SCHEME}://${AUTH_CALLBACK_PATH}`);
+
+  assert.equal(isExpoGoUrl('exp://127.0.0.1:8081/--/auth/callback'), true);
+  assert.equal(isExpoGoUrl('https://example.com/auth/callback'), false);
+  assert.equal(isExpoGoUrl(''), false);
+});
+
+test('mobile auth: the redirect agrees with app.json and lands on a real route', () => {
+  const appJson = JSON.parse(readFileSync(new URL('../app.json', import.meta.url), 'utf8'));
+  assert.equal(appJson.expo.scheme, AUTH_SCHEME);
+  assert.ok(
+    existsSync(new URL(`../app/${AUTH_CALLBACK_PATH}.tsx`, import.meta.url)),
+    `app/${AUTH_CALLBACK_PATH}.tsx must exist — the provider returns to that path`,
+  );
 });

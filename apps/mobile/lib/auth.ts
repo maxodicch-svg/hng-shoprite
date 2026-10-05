@@ -8,12 +8,15 @@
  *      returns Google's authorization URL;
  *   2. the app opens it in a system browser tab (`expo-web-browser`), which is
  *      also what Google requires — an embedded webview is rejected;
- *   3. Google redirects back to `zedustore://auth/callback?code=…`;
+ *   3. Google redirects back to the return URL with `?code=…`;
  *   4. `exchangeCodeForSession(code)` trades that code for a session.
  *
- * `zedustore://auth/callback` must be listed in
- * Supabase → Authentication → URL Configuration → Redirect URLs, or step 3 fails
- * with a redirect error.
+ * The return URL depends on the runtime and is resolved by `lib/redirect.ts`:
+ * in Expo Go it is the Metro dev URL (`exp://<host>:8081/--/auth/callback`),
+ * because Expo Go registers only the `exp://` scheme; in a dev or standalone
+ * build it is the `app.json` scheme, `zedustore://auth/callback`. Whichever one
+ * applies must be listed in Supabase → Authentication → URL Configuration →
+ * Redirect URLs, or step 3 fails with a redirect error.
  *
  * The session is persisted in AsyncStorage, so the app stays signed in between
  * launches. The service role key is never used here — anon key only.
@@ -25,7 +28,8 @@ import { createClient, type Session } from '@supabase/supabase-js';
 import * as WebBrowser from 'expo-web-browser';
 import * as Linking from 'expo-linking';
 
-import { AUTH_REDIRECT, SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from './config.ts';
+import { SUPABASE_ANON_KEY, SUPABASE_URL, supabaseConfigured } from './config.ts';
+import { AUTH_CALLBACK_PATH, authRedirectFor } from './redirect.ts';
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -67,8 +71,8 @@ function parseRedirect(url: string): { code?: string; error?: string } {
   }
 }
 
-/** Deep link the app is waiting for, e.g. `zedustore://auth/callback`. */
-export const redirectUri = AUTH_REDIRECT;
+/** The return URL the app is waiting for: `exp://…` in Expo Go, `zedustore://…` in a build. */
+export const redirectUri = authRedirectFor(Linking.createURL(AUTH_CALLBACK_PATH));
 
 export type SignInResult = { ok: true } | { ok: false; error: string; cancelled?: boolean };
 

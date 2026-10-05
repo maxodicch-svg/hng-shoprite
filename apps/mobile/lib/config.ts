@@ -14,8 +14,8 @@ export const API_BASE_URL = rawApiBase.replace(/\/+$/, '');
 export const SUPABASE_URL = rawSupabaseUrl.replace(/\/+$/, '');
 export const SUPABASE_ANON_KEY = rawAnonKey;
 
-/** The deep link Google sign-in returns to. Must match the Supabase allow-list. */
-export const AUTH_REDIRECT = 'zedustore://auth/callback';
+// The OAuth return URL is *not* here: it depends on the runtime (Expo Go can
+// only receive `exp://` links). See `lib/redirect.ts`.
 
 /** True when both halves of the Supabase config are present. */
 export const supabaseConfigured = Boolean(SUPABASE_URL && SUPABASE_ANON_KEY);

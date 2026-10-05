@@ -3,15 +3,16 @@ import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-nati
 import { Link, router, useLocalSearchParams } from 'expo-router';
 
 import { completeSignInFromUrl } from '../../lib/auth.ts';
+import { AUTH_SCHEME_REDIRECT } from '../../lib/redirect.ts';
 import { useStore } from '../../lib/store-context.tsx';
 
 /**
- * Deep-link landing for `zedustore://auth/callback`.
+ * Deep-link landing for the OAuth return URL.
  *
  * Usually unused: `openAuthSessionAsync` returns the redirect straight to
  * `signInWithGoogle`. It exists for the case where the OS cold-starts the app on
- * the redirect URL, which would otherwise leave the user signed out with no
- * explanation.
+ * the redirect URL — which is the normal path in Expo Go, where the link is an
+ * `exp://…` dev URL rather than the app scheme.
  */
 export default function AuthCallbackScreen() {
   const params = useLocalSearchParams<{ code?: string; error?: string; error_description?: string }>();
@@ -39,7 +40,7 @@ export default function AuthCallbackScreen() {
         return;
       }
 
-      const query = `zedustore://auth/callback?code=${encodeURIComponent(String(params.code))}`;
+      const query = `${AUTH_SCHEME_REDIRECT}?code=${encodeURIComponent(String(params.code))}`;
       const result = await completeSignInFromUrl(query);
       if (!active) return;
 

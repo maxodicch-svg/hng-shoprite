@@ -30,7 +30,7 @@
     },
     "plugins": ["expo-router"],
     "extra": {
-      "comment": "The deep link `zedustore://auth/callback` must also be registered in Supabase -> Authentication -> URL Configuration -> Redirect URLs, or Google sign-in fails with a redirect error.",
+      "comment": "OAuth return URL. In a dev/standalone build it is `zedustore://auth/callback`; inside Expo Go it is the Metro dev URL, `exp://<host>:8081/--/auth/callback`, because Expo Go registers only the exp:// scheme. Whichever applies must be registered in Supabase -> Authentication -> URL Configuration -> Redirect URLs, or Google sign-in never comes back to the app. See apps/mobile/lib/redirect.ts.",
       "router": {
         "origin": false
       }
